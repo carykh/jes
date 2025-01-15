@@ -333,6 +333,8 @@ class UI:
         for i in range(L):
             if self.visualSimMemory[i][2] < self.sim.trial_time:
                 self.visualSimMemory[i] = self.sim.simulateRun(self.visualSimMemory[i], 1, False)
+            if self.CLH[0] is None:
+                return
             DIM = arrayIntMultiply(self.MOVIE_SINGLE_DIM, MSCALE[self.CLH[0]])
             self.movieScreens[i] = pygame.Surface(DIM, pygame.SRCALPHA, 32)
         
