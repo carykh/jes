@@ -23,11 +23,6 @@ sim: Sim = Sim(creature_count=int(c_input), config=sim_config)
 
 ui: UI = UI(config=ui_config)
 
-# ui = UI(_W_W=1920, _W_H=1080, _MOVIE_SINGLE_DIM=(650,650),
-# _GRAPH_COOR=(850,50,900,500), _SAC_COOR=(850,560,900,300), _GENEALOGY_COOR=(20,105,530,802,42),
-# _COLUMN_MARGIN=330, _MOSAIC_DIM=[10,24,24,30], #_MOSAIC_DIM=[10,10,17,22],
-# _MENU_TEXT_UP=180, _CM_MARGIN1=20, _CM_MARGIN2=1)
-
 sim.ui = ui
 ui.sim = sim
 ui.add_buttons_and_sliders()
@@ -40,5 +35,5 @@ while ui.running:
     ui.detect_events()
     ui.detect_sliders()
     ui.do_movies()
-    ui.drawMenu()
+    ui.draw_menu()
     ui.show()

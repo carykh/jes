@@ -175,11 +175,11 @@ class Sim:
                 info.apex_pop = pop
                 info.reps[2] = best_of_each_species[sp] # apex representative
             if pop >= self.creature_count*self.S_NOTABLE and not info.prominent:  #prominent threshold
-                info.becomeProminent()
+                info.become_prominent()
                 
     def check_alap(self) -> None:
-        if self.ui.ALAPButton.setting == 1: # We're already ALAP-ing!
-            self.do_generation(self.ui.doGenButton)
+        if self.ui.alap_button.setting == 1: # We're already ALAP-ing!
+            self.do_generation(self.ui.do_gen_button)
         
     def do_generation(self, button):
         generation_start_time = time.time() #calculates how long each generation takes to run
@@ -206,7 +206,7 @@ class Sim:
             else:
                 new_species_pops[species] = [1, None, None]
             if species not in best_of_each_species:
-                best_of_each_species[species] = self.creatures[gen][c].IDNumber
+                best_of_each_species[species] = self.creatures[gen][c].id_number
 
         self.do_species_info(new_species_pops, best_of_each_species)
 
@@ -268,6 +268,6 @@ class Sim:
 
         if new_creature.species != parent.species:
             self.species_info.append(SpeciesInfo(self, new_creature,parent))
-            new_creature.codonWithChange = cwc
+            new_creature.codon_with_change = cwc
 
         return new_creature

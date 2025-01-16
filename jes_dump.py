@@ -130,7 +130,7 @@ BG_COLOR = (0,0,0)
                 sp.apex_pop = pop
                 sp.reps[2] = best_of_each_species[s] # apex representative
             if pop > self.creature_count*0.10 and not sp.prominent:  #prominent threshold
-                sp.becomeProminent()
+                sp.become_prominent()
                 
             sp.reps[3] = best_of_each_species[s] # most-recent representative
             p1 = p2

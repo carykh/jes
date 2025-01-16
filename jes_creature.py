@@ -14,18 +14,18 @@ class Creature:
         self.calmState = None
         self.icons = [None]*2
         self.icon_coor = None
-        self.IDNumber = p_id_number
+        self.id_number = p_id_number
         self.fitness = None
         self.rank = None
         self.living = True
         self.species = self.get_species(parent_species)
         self.sim = _sim
         self.ui = _ui
-        self.codonWithChange = None
+        self.codon_with_change = None
     
     def get_species(self, parent_species):
         if parent_species == -1:
-            return self.IDNumber
+            return self.id_number
         else:
             return parent_species
     
@@ -142,13 +142,13 @@ class Creature:
         alpha = min(max(int(155+traits[2]*100),64),255) #alpha can't go below 25%
         color_result = (red,green,255,alpha)
         
-        if self.codonWithChange is not None:
+        if self.codon_with_change is not None:
             next_green = 0
-            if dna_index <= self.codonWithChange < dna_index+self.sim.traits_per_box:
+            if dna_index <= self.codon_with_change < dna_index+self.sim.traits_per_box:
                 next_green = 1
 
             prev_green = 0
-            if dna_index_prev <= self.codonWithChange < dna_index_prev+self.sim.traits_per_box:
+            if dna_index_prev <= self.codon_with_change < dna_index_prev+self.sim.traits_per_box:
                 prev_green = 1
 
             green_ness = lerp(prev_green,next_green,prog)

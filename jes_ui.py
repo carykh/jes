@@ -1,9 +1,12 @@
+from typing import Optional
+
 import pygame
 from pygame import Surface
 from pygame.font import Font
 
 from enums import Color
 from jes_creature import Creature
+from jes_species_info import SpeciesInfo
 from utils import species_to_color, species_to_name, dist_to_text, bound, get_dist, array_int_multiply
 from jes_dataviz import display_all_graphs, draw_all_graphs
 from jes_shapes import  drawRingLight, draw_x, center_text, align_text, draw_species_circle
@@ -83,26 +86,35 @@ class UI:
         self.storage_coor = (660, 52)
         self.running: bool = True
 
+        self.gen_slider: Slider = Optional[Slider]
+        self.show_creatures_button: Button = Optional[Button]
+        self.sort_button: Button = Optional[Button]
+        self.style_button: Button = Optional[Button]
+        self.sample_button: Button = Optional[Button]
+        self.do_gen_button: Button = Optional[Button]
+        self.alap_button: Button = Optional[Button]
+
+
     def add_buttons_and_sliders(self):
-        self.gen_slider = Slider(self, (40, self.window_height - 100, self.window_width - 80, 60, 140), 0, 0, 0, True, True, self.updateGenSlider)
+        self.gen_slider = Slider(self, (40, self.window_height - 100, self.window_width - 80, 60, 140), 0, 0, 0, True, True, self.update_gen_slider)
 
         button_coor = []
         for i in range(6):
             button_coor.append((self.window_width - 1340 + 220 * i, self.window_height - self.menu_text_up, 200, 60))
 
-        self.showCreaturesButton = Button(self, button_coor[0],["Show creatures", "Hide creatures"], self.toggleCreatures)
-        self.sortButton = Button(self,button_coor[1],["Sort by ID", "Sort by fitness", "Sort by weakness"], self.toggleSort)
-        self.styleButton = Button(self, button_coor[2], ["Big Icons", "Small Icons", "Species Tiles"], self.toggle_style)
-        self.sampleButton = Button(self, button_coor[3], ["Watch sample", "Stop sample"], self.start_sample)
-        self.doGenButton = Button(self, button_coor[4], ["Do a generation"], self.sim.do_generation)
-        self.ALAPButton = Button(self, button_coor[5], ["Turn on ALAP", "Turn off ALAP"], self.do_nothing)
+        self.show_creatures_button = Button(self, button_coor[0], ["Show creatures", "Hide creatures"], self.toggle_creatures)
+        self.sort_button = Button(self, button_coor[1], ["Sort by ID", "Sort by fitness", "Sort by weakness"], self.toggle_sort)
+        self.style_button = Button(self, button_coor[2], ["Big Icons", "Small Icons", "Species Tiles"], self.toggle_style)
+        self.sample_button = Button(self, button_coor[3], ["Watch sample", "Stop sample"], self.start_sample)
+        self.do_gen_button = Button(self, button_coor[4], ["Do a generation"], self.sim.do_generation)
+        self.alap_button = Button(self, button_coor[5], ["Turn on ALAP", "Turn off ALAP"], self.do_nothing)
         
         
     def reverse(self, i):
         return self.sim.creature_count-1-i
         
     def detect_mouse_motion(self):
-        if self.sampleButton.setting == 1:
+        if self.sample_button.setting == 1:
             return
         gen = self.gen_slider.val
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -111,13 +123,13 @@ class UI:
             rel_mouse_x = mouse_x-self.cm_margin_1
             rel_mouse_y = mouse_y-self.cm_margin_1
             if 0 <= rel_mouse_x < self.mosaic_screen_width_creatures and 0 <= rel_mouse_y < self.mosaic_screen_height:
-                dim = self.mosaic_dim[self.styleButton.setting]
+                dim = self.mosaic_dim[self.style_button.setting]
                 spacing = self.mosaic_screen_width_creatures / dim
                 ix = min(int(rel_mouse_x/spacing),dim)
                 iy = int(rel_mouse_y/spacing)
                 i = iy*dim+ix
                 if 0 <= i < self.sim.creature_count:
-                    sort = self.sortButton.setting
+                    sort = self.sort_button.setting
                     if sort == 0 or gen >= len(self.sim.rankings):
                         new_clh = [0,i,i]
                     elif sort == 1:
@@ -194,18 +206,18 @@ class UI:
         for c in range(self.sim.creature_count):
             i = c
             if self.sim.creatures[gen][c].rank is not None:
-                if self.sortButton.setting == 1:
+                if self.sort_button.setting == 1:
                     i = self.sim.creatures[gen][c].rank
-                elif self.sortButton.setting == 2:
+                elif self.sort_button.setting == 2:
                     i = self.reverse(self.sim.creatures[gen][c].rank)
-            dim = self.mosaic_dim[self.styleButton.setting]
+            dim = self.mosaic_dim[self.style_button.setting]
             x = i % dim
             y = i//dim
             creature = self.sim.creatures[gen][c]
             spacing = self.mosaic_screen_width_creatures / dim
             creature.icon_coor = (x * spacing + self.cm_margin_2, y * spacing + self.cm_margin_2, spacing, spacing)
             if creature.icon_coor[1] < self.mosaic_screen.get_height():
-                s = self.styleButton.setting
+                s = self.style_button.setting
                 if s <= 1:
                     self.mosaic_screen.blit(creature.icons[s], creature.icon_coor)
                 elif s == 2:
@@ -219,10 +231,10 @@ class UI:
         x_center = int(self.info_w * 0.5)
         self.info_bar_screen.fill(Color.MOSAIC)
 
-        stri: list[str] = [f"Creature #{creature.IDNumber}", f"Species: {species_to_name(creature.species, self)}", "Untested"]
+        stri: list[str] = [f"Creature #{creature.id_number}", f"Species: {species_to_name(creature.species, self)}", "Untested"]
         if creature.fitness is not None:
             fate = "Living" if creature.living else "Killed"
-            stri = [f"Creature #{creature.IDNumber}",f"Species: {species_to_name(creature.species, self)}", f"Fitness: {dist_to_text(creature.fitness, True, self.sim.units_per_meter)}", f"Rank: {creature.rank + 1} - {fate}"]
+            stri = [f"Creature #{creature.id_number}", f"Species: {species_to_name(creature.species, self)}", f"Fitness: {dist_to_text(creature.fitness, True, self.sim.units_per_meter)}", f"Rank: {creature.rank + 1} - {fate}"]
             
         for i in range(len(stri)):
             color = Color.WHITE
@@ -248,20 +260,20 @@ class UI:
     
     def draw_movie_quad(self, species) -> None:
         l = 4
-        info = self.sim.species_info[species]
-        a_name = species_to_name(info.ancestorID, self)
+        info: SpeciesInfo = self.sim.species_info[species]
+        a_name = species_to_name(info.ancestor_id, self)
         s_name = species_to_name(species, self)
         titles = ["Ancestor","First","Apex","Last"]
         mask = [True] * l
 
         for i in range(l):
-            if (info.ancestorID is None and i == 0) or (i >= 2 and info.getWhen(i) == info.getWhen(i-1)):
+            if (info.ancestor_id is None and i == 0) or (i >= 2 and info.get_when(i) == info.get_when(i - 1)):
                 mask[i] = False
                 continue
 
             stri = a_name if i == 0 else s_name
-            performance = info.getPerformance(self.sim, i)
-            titles[i] = f"G{info.getWhen(i)}: {titles[i]} {stri} ({dist_to_text(performance, True, self.sim.units_per_meter)})"
+            performance = info.get_performance(self.sim, i)
+            titles[i] = f"G{info.get_when(i)}: {titles[i]} {stri} ({dist_to_text(performance, True, self.sim.units_per_meter)})"
 
         coor = (self.cm_margin_1 + self.mosaic_screen_width_creatures, 0)
         self.draw_movie_grid(self.screen, coor, mask, titles, [Color.GRAYISH] * l, self.tiny_font)
@@ -270,7 +282,7 @@ class UI:
     def draw_info_bar_species(self, species) -> None:
         self.info_bar_screen.fill(Color.MOSAIC)
         info = self.sim.species_info[species]
-        a_name = species_to_name(info.ancestorID, self)
+        a_name = species_to_name(info.ancestor_id, self)
         s_name = species_to_name(species, self)
         now = min(self.gen_slider.val, len(self.sim.species_pops) - 1)
         now_pop = 0
@@ -278,13 +290,13 @@ class UI:
         if species in self.sim.species_pops[now]:
             now_pop = self.sim.species_pops[now][species][0]
             extinct_string = ""
-        strings = [f"Species {s_name}",f"Ancestor {a_name}",f"Lifespan: G{info.getWhen(1)} - G{info.getWhen(3)}{extinct_string}", f"Population:   {info.apex_pop} at apex (G{info.getWhen(2)})   |   {now_pop} now (G{now})"]
+        strings = [f"Species {s_name}",f"Ancestor {a_name}",f"Lifespan: G{info.get_when(1)} - G{info.get_when(3)}{extinct_string}", f"Population:   {info.apex_pop} at apex (G{info.get_when(2)})   |   {now_pop} now (G{now})"]
         colors = [Color.WHITE]*len(strings)
         colors[0] = species_to_color(species, self)
-        if info.ancestorID is None:
+        if info.ancestor_id is None:
             strings[1] = "Primordial species"
         else:
-            colors[1] = species_to_color(info.ancestorID, self)
+            colors[1] = species_to_color(info.ancestor_id, self)
         for i in range(len(strings)):
             x_center = int(self.info_w * (0.5 if i == 3 else 0.3))
             center_text(self.info_bar_screen, strings[i], x_center, self.movie_single_dim[1] + 40 + 42 * i, colors[i], self.small_font)
@@ -313,8 +325,8 @@ class UI:
         self.screen.blit(gen_surface,(40,y))
         if self.species_storage is not None:
             s = self.species_storage
-            R = self.genealogy_coor[4]
-            draw_species_circle(self.screen, s, self.storage_coor, R, self.sim, self.sim.species_info, self.tiny_font, False, self)
+            r = self.genealogy_coor[4]
+            draw_species_circle(self.screen, s, self.storage_coor, r, self.sim, self.sim.species_info, self.tiny_font, False, self)
         
     def r_to_rank(self,r):
         return 0 if r == 0 else (self.sim.creature_count - 1 if r == 2 else self.sim.creature_count // 2)
@@ -327,34 +339,39 @@ class UI:
                 r_i = self.r_to_rank(r)
                 index = self.sim.rankings[gen][r_i]
                 creature = self.sim.creatures[gen][index]
-                DIM = (self.preview_locations[r][2], self.preview_locations[r][3])
-                preview = creature.draw_icon(DIM, Color.MOSAIC, self.sim.beat_fade_time)
-                center_text(preview, f"{names[r]} creature", DIM[0] / 2, DIM[1] - 20, Color.WHITE, self.small_font)
+                dim = (self.preview_locations[r][2], self.preview_locations[r][3])
+                preview = creature.draw_icon(dim, Color.MOSAIC, self.sim.beat_fade_time)
+                center_text(preview, f"{names[r]} creature", dim[0] / 2, dim[1] - 20, Color.WHITE, self.small_font)
                 align_text(preview, dist_to_text(creature.fitness, True, self.sim.units_per_meter), 10, 20, Color.WHITE, self.small_font, 0.0, None)
                 self.screen.blit(preview, (self.preview_locations[r][0], self.preview_locations[r][1]))
-            
-            
-        
-    def do_movies(self):
+
+    def do_movies(self) -> None:
         l = len(self.visual_sim_memory)
         mscale = [1, 1, 0.5, 0.70]  # movie screen scale
-        if self.sampleButton.setting == 1:
+        if self.sample_button.setting == 1:
             self.sample_frames += 1
             if self.sample_frames >= self.sim.trial_time+self.sample_freeze_time:
-                self.startSampleHelper()
+                self.start_sample_helper()
+
         for i in range(l):
             if self.visual_sim_memory[i][2] < self.sim.trial_time:
                 self.visual_sim_memory[i] = self.sim.simulate_run(self.visual_sim_memory[i], 1, False)
 
-            dim = array_int_multiply(self.movie_single_dim, mscale[self.creature_location_highlight[0]])
-            self.movie_screens[i] = pygame.Surface(dim, pygame.SRCALPHA, 32)
-        
-            node_arr, _, current_frame = self.visual_sim_memory[i]
-            s = dim[0]/(self.sim.CW+2)*0.5 # visual transform scale
-        
-            average_x = np.mean(node_arr[:,:,:,0])
-            transform = [dim[0]/2 - average_x*s,dim[1]*0.8,s]
-            self.creature_highlight[i].draw_creature(self.movie_screens[i], node_arr[0], current_frame, transform, True, (i == 0))
+            try:
+                dim = array_int_multiply(self.movie_single_dim, mscale[self.creature_location_highlight[0]])
+
+
+                self.movie_screens[i] = pygame.Surface(dim, pygame.SRCALPHA, 32)
+
+                node_arr, _, current_frame = self.visual_sim_memory[i]
+                s = dim[0]/(self.sim.CW+2)*0.5 # visual transform scale
+
+                average_x = np.mean(node_arr[:,:,:,0])
+                transform = [dim[0]/2 - average_x*s,dim[1]*0.8,s]
+                self.creature_highlight[i].draw_creature(self.movie_screens[i], node_arr[0], current_frame, transform, True, (i == 0))
+
+            except Exception as _:
+                pass
                 
     def get_highlighted_species(self):
         gen = self.gen_slider.val
@@ -391,41 +408,45 @@ class UI:
                         draw_all_graphs(self.sim, self)
                         self.clear_movies()
                         self.detect_mouse_motion()
+
                 elif event.key == 13: # pressing Enter
                     self.sim.do_generation(None)
+
                 elif event.key == 113: # pressing 'Q'
-                    self.showCreaturesButton.timeOfLastClick = time.time()
-                    self.showCreaturesButton.setting = 1-self.showCreaturesButton.setting
-                    self.toggleCreatures(self.showCreaturesButton)
+                    self.show_creatures_button.timeOfLastClick = time.time()
+                    self.show_creatures_button.setting = 1 - self.show_creatures_button.setting
+                    self.toggle_creatures(self.show_creatures_button)
                 
                     
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouseX, mouseY = pygame.mouse.get_pos()
+                mouse_x, mouse_y = pygame.mouse.get_pos()
                 for slider in self.slider_list:
                     s_x, s_y, s_w, s_h, s_dw = slider.dim
-                    if mouseX >= s_x and mouseX < s_x+s_w and mouseY >= s_y and mouseY < s_y+s_h:
+                    if s_x <= mouse_x < s_x+s_w and s_y <= mouse_y < s_y + s_h:
                         self.slider_drag = slider
                         break
                 for button in self.button_list:
                     s_x, s_y, s_w, s_h = button.dim
-                    if mouseX >= s_x and mouseX < s_x+s_w and mouseY >= s_y and mouseY < s_y+s_h:
+                    if s_x <= mouse_x < s_x+s_w and s_y <= mouse_y < s_y + s_h:
                         button.click()
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.slider_drag is not None:
                     self.slider_drag.updateVal()
                     self.slider_drag = None
 
-    def drawMenu(self):
+    def draw_menu(self) -> None:
         self.screen.blit(self.background_pic, (0, 0))
         self.draw_menu_text()
         self.draw_previews()
+
         display_all_graphs(self.screen, self.sim, self)
-        self.drawSlidersAndButtons()
+
+        self.draw_sliders_and_buttons()
         self.display_creature_mosaic(self.screen)
         self.display_movies(self.screen)
 
     def display_creature_mosaic(self, screen):
-        time_since_last_press = time.time()-self.showCreaturesButton.timeOfLastClick
+        time_since_last_press = time.time()-self.show_creatures_button.timeOfLastClick
         pan_time = 0.2
         frac = bound(time_since_last_press/pan_time)
 
@@ -435,7 +456,7 @@ class UI:
         if not self.mosaic_visible and frac < 1:
             self.screen.blit(self.mosaic_screen, (self.cm_margin_1, self.cm_margin_1 - self.mosaic_screen.get_height() * frac))
     
-    def display_movies(self, screen):
+    def display_movies(self, screen) -> None:
         if self.creature_location_highlight[0] is None:
             return
 
@@ -447,6 +468,7 @@ class UI:
                 sp = self.creature_highlight[i].species
                 species_names[i] = species_to_name(sp, self)
                 species_colors[i] = species_to_color(sp, self)
+
             self.draw_movie_grid(screen, (0, 0), [True] * lms, species_names, species_colors, self.small_font)
             return
 
@@ -469,9 +491,9 @@ class UI:
 
     def detect_sliders(self):
         if self.slider_drag is not None:
-            mouseX, mouseY = pygame.mouse.get_pos()
+            mouse_x, mouse_y = pygame.mouse.get_pos()
             s_x, s_y, s_w, s_h, s_dw = self.slider_drag.dim
-            ratio = bound(((mouseX-s_dw*0.5)-s_x)/(s_w-s_dw))
+            ratio = bound(((mouse_x-s_dw*0.5)-s_x)/(s_w-s_dw))
             
             s_range = self.slider_drag.val_max - self.slider_drag.val_min
             self.slider_drag.tval = ratio * s_range + self.slider_drag.val_min
@@ -480,20 +502,20 @@ class UI:
             if self.slider_drag.update_live:
                 self.slider_drag.updateVal()
        
-    def drawSlidersAndButtons(self):
+    def draw_sliders_and_buttons(self):
         for slider in self.slider_list:
             slider.drawSlider(self.screen)
         for button in self.button_list:
             button.draw_button(self.screen, self.small_font)
        
     # Button and slider functions
-    def updateGenSlider(self, gen):
+    def update_gen_slider(self, gen):
         self.draw_creature_mosaic(gen)
         
-    def toggleCreatures(self, button):
+    def toggle_creatures(self, button):
         self.mosaic_visible = (button.setting == 1)
         
-    def toggleSort(self, button):
+    def toggle_sort(self, button):
         self.draw_creature_mosaic(self.gen_slider.val)
         
     def toggle_style(self, button):
@@ -505,22 +527,24 @@ class UI:
     def start_sample(self, button):
         if button.setting == 1:
             self.sample_i = 0
-            self.startSampleHelper()
+            self.start_sample_helper()
         
-    def startSampleHelper(self):
-        L = 8
+    def start_sample_helper(self):
+        l = 8
         self.creature_highlight = []
         self.visual_sim_memory = []
         self.movie_screens = []
         self.creature_location_highlight = [3, 0]
         self.sample_frames = 0
-        for i in range(L):
+        for i in range(l):
             gen = self.gen_slider.val
             c = (self.sample_i+i)%self.sim.creature_count
             self.creature_highlight.append(self.sim.creatures[gen][c])
             self.visual_sim_memory.append(self.sim.simulate_import(gen, c, c + 1, True))
             self.movie_screens.append(None)
-        self.sample_i += L
-        
-    def show(self):
+
+        self.sample_i += l
+
+    @staticmethod
+    def show():
         pygame.display.flip()
