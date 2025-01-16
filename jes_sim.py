@@ -250,7 +250,7 @@ class Sim:
                 self.creatures[gen+1][c].icons[i] = self.creatures[gen+1][c].draw_icon(self.ui.icon_dim[i], Color.MOSAIC, self.beat_fade_time)
   
         self.ui.gen_slider.val_max = gen + 1
-        self.ui.gen_slider.manualUpdate(gen)
+        self.ui.gen_slider.manual_update(gen)
         self.last_gen_run_time = time.time() - generation_start_time
         
         self.ui.creature_location_highlight = [None, None, None]

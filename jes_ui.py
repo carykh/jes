@@ -9,7 +9,7 @@ from jes_creature import Creature
 from jes_species_info import SpeciesInfo
 from utils import species_to_color, species_to_name, dist_to_text, bound, get_dist, array_int_multiply
 from jes_dataviz import display_all_graphs, draw_all_graphs
-from jes_shapes import  drawRingLight, draw_x, center_text, align_text, draw_species_circle
+from jes_shapes import  draw_ring_light, draw_x, center_text, align_text, draw_species_circle
 from jes_slider import Slider
 from jes_button import Button
 import time
@@ -19,8 +19,6 @@ import random
 
 class UI:
     def __init__(self, config: dict):
-        self.slider_list: list = []
-        self.button_list: list = []
         self.title: str = config.get('title')
         pygame.display.set_caption(self.title)
         pygame.font.init()
@@ -86,6 +84,9 @@ class UI:
         self.storage_coor = (660, 52)
         self.running: bool = True
 
+        self.slider_list: list[Slider] = []
+        self.button_list: list[Button] = []
+
         self.gen_slider: Slider = Optional[Slider]
         self.show_creatures_button: Button = Optional[Button]
         self.sort_button: Button = Optional[Button]
@@ -96,19 +97,32 @@ class UI:
 
 
     def add_buttons_and_sliders(self):
-        self.gen_slider = Slider(self, (40, self.window_height - 100, self.window_width - 80, 60, 140), 0, 0, 0, True, True, self.update_gen_slider)
+        self.gen_slider: Slider = Slider(pdim=(40, self.window_height - 100, self.window_width - 80, 60, 140), callback_func=self.update_gen_slider)
+
+        self.slider_list.append(self.gen_slider)
 
         button_coor = []
         for i in range(6):
             button_coor.append((self.window_width - 1340 + 220 * i, self.window_height - self.menu_text_up, 200, 60))
 
-        self.show_creatures_button = Button(self, button_coor[0], ["Show creatures", "Hide creatures"], self.toggle_creatures)
-        self.sort_button = Button(self, button_coor[1], ["Sort by ID", "Sort by fitness", "Sort by weakness"], self.toggle_sort)
-        self.style_button = Button(self, button_coor[2], ["Big Icons", "Small Icons", "Species Tiles"], self.toggle_style)
-        self.sample_button = Button(self, button_coor[3], ["Watch sample", "Stop sample"], self.start_sample)
-        self.do_gen_button = Button(self, button_coor[4], ["Do a generation"], self.sim.do_generation)
-        self.alap_button = Button(self, button_coor[5], ["Turn on ALAP", "Turn off ALAP"], self.do_nothing)
-        
+        self.show_creatures_button = Button(button_coor[0], ["Show creatures", "Hide creatures"], self.toggle_creatures)
+        self.button_list.append(self.show_creatures_button)
+
+        self.sort_button = Button(button_coor[1], ["Sort by ID", "Sort by fitness", "Sort by weakness"], self.toggle_sort)
+        self.button_list.append(self.sort_button)
+
+        self.style_button = Button(button_coor[2], ["Big Icons", "Small Icons", "Species Tiles"], self.toggle_style)
+        self.button_list.append(self.style_button)
+
+        self.sample_button = Button(button_coor[3], ["Watch sample", "Stop sample"], self.start_sample)
+        self.button_list.append(self.sample_button)
+
+        self.do_gen_button = Button(button_coor[4], ["Do a generation"], self.sim.do_generation)
+        self.button_list.append(self.do_gen_button)
+
+        self.alap_button = Button(button_coor[5], ["Turn on ALAP", "Turn off ALAP"], self.do_nothing)
+        self.button_list.append(self.alap_button)
+
         
     def reverse(self, i):
         return self.sim.creature_count-1-i
@@ -393,7 +407,7 @@ class UI:
                 if event.key == pygame.K_RIGHT:
                     new_gen = min(self.gen_slider.val_max, self.gen_slider.val + 1)
                 if new_gen is not None:
-                    self.gen_slider.manualUpdate(new_gen)
+                    self.gen_slider.manual_update(new_gen)
                     self.clear_movies()
                     self.detect_mouse_motion()
                 if event.key == 120: # pressing X will hide the Xs showing killed creatures
@@ -413,7 +427,7 @@ class UI:
                     self.sim.do_generation(None)
 
                 elif event.key == 113: # pressing 'Q'
-                    self.show_creatures_button.timeOfLastClick = time.time()
+                    self.show_creatures_button.time_of_last_click = time.time()
                     self.show_creatures_button.setting = 1 - self.show_creatures_button.setting
                     self.toggle_creatures(self.show_creatures_button)
                 
@@ -429,9 +443,10 @@ class UI:
                     s_x, s_y, s_w, s_h = button.dim
                     if s_x <= mouse_x < s_x+s_w and s_y <= mouse_y < s_y + s_h:
                         button.click()
+
             elif event.type == pygame.MOUSEBUTTONUP:
                 if self.slider_drag is not None:
-                    self.slider_drag.updateVal()
+                    self.slider_drag.update_val()
                     self.slider_drag = None
 
     def draw_menu(self) -> None:
@@ -446,7 +461,7 @@ class UI:
         self.display_movies(self.screen)
 
     def display_creature_mosaic(self, screen):
-        time_since_last_press = time.time()-self.show_creatures_button.timeOfLastClick
+        time_since_last_press = time.time()-self.show_creatures_button.time_of_last_click
         pan_time = 0.2
         frac = bound(time_since_last_press/pan_time)
 
@@ -481,12 +496,12 @@ class UI:
         self.screen.blit(self.movie_screens[0], coor)
         if self.creature_location_highlight[0] == 1:
             dim = self.preview_locations[self.creature_location_highlight[2]]
-            self.screen.blit(drawRingLight(dim[2],dim[3],6),(dim[0],dim[1]))
+            self.screen.blit(draw_ring_light(dim[2], dim[3], 6), (dim[0], dim[1]))
         else:
             coor = self.sim.creatures[gen][self.creature_location_highlight[1]].icon_coor
             x = coor[0]+self.cm_margin_1
             y = coor[1]+self.cm_margin_1
-            self.screen.blit(drawRingLight(coor[2],coor[3],6),(x,y))
+            self.screen.blit(draw_ring_light(coor[2], coor[3], 6), (x, y))
 
 
     def detect_sliders(self):
@@ -500,11 +515,12 @@ class UI:
             if self.slider_drag.snap_to_int:
                 self.slider_drag.tval = round(self.slider_drag.tval)
             if self.slider_drag.update_live:
-                self.slider_drag.updateVal()
+                self.slider_drag.update_val()
        
     def draw_sliders_and_buttons(self):
         for slider in self.slider_list:
-            slider.drawSlider(self.screen)
+            slider.draw_slider(self.screen)
+
         for button in self.button_list:
             button.draw_button(self.screen, self.small_font)
        

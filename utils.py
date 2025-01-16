@@ -77,6 +77,7 @@ def species_to_color(s, ui):
     brightness = (math.floor(int(_hex, 16)//10000)%100)/100
     color = hue_to_rgb(hue)
     new_color = brighten(color, 0.85+0.6*brightness)
+
     return new_color
     
 def bound(x):

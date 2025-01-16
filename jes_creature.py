@@ -3,7 +3,7 @@ from pygame import Surface
 
 from enums import Color
 from utils import array_lerp, dist_to_text, species_to_color, list_lerp, lerp
-from jes_shapes import drawRect, drawTextRect, center_text, draw_clock
+from jes_shapes import draw_rect, draw_text_rect, center_text, draw_clock
 import numpy as np
 import math
 import random
@@ -44,17 +44,17 @@ class Creature:
         
     def draw_environment(self, surface, transform) -> None:
         #sky
-        drawRect(surface, transform,None, Color.BLACK)
+        draw_rect(surface, transform, None, Color.BLACK)
         
         #signs
         font = self.ui.big_font if transform[2] >= 50 else self.ui.small_font
         for meters in range(0,3000,100):
             u = meters*self.sim.units_per_meter
-            drawRect(surface,transform,[u-0.2,-6,u+0.2,0], Color.SIGN)
-            drawTextRect(surface,transform,[u-1.5,-6.8,u+1.5,-5.4], Color.SIGN, Color.WHITE,f"{meters}cm",font)
+            draw_rect(surface, transform, [u - 0.2, -6, u + 0.2, 0], Color.SIGN)
+            draw_text_rect(surface, transform, [u - 1.5, -6.8, u + 1.5, -5.4], Color.SIGN, Color.WHITE, f"{meters}cm", font)
         
         #ground
-        drawRect(surface,transform,[None,0,None,None], Color.WHITE)
+        draw_rect(surface, transform, [None, 0, None, None], Color.WHITE)
 
     def draw_creature(self, surface, node_state, frame, transform, draw_labels:bool, should_draw_clock: bool):
         if draw_labels:

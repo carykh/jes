@@ -1,17 +1,18 @@
+from typing import Callable
+
 import pygame
 from jes_shapes import center_text
 import time
 
 class Button:
-    def __init__(self, ui, pdim, pnames, pfunc):
+    def __init__(self, pdim, pnames, callback_func: Callable) -> None:
         self.dim = pdim  # Dim is a list of 4 parameters: x, y, width, height
         self.names = pnames
         self.setting = 0
-        self.timeOfLastClick = 0
-        self.func = pfunc
-        ui.button_list.append(self)
-        
-    def draw_button(self, screen, font):
+        self.time_of_last_click = 0
+        self._func = callback_func
+
+    def draw_button(self, screen, font) -> None:
         x, y, w, h = self.dim
         name = self.names[self.setting]
         
@@ -25,5 +26,5 @@ class Button:
         
     def click(self) -> None:
         self.setting = (self.setting + 1)%len(self.names)
-        self.timeOfLastClick = time.time()
-        self.func(self)
+        self.time_of_last_click = time.time()
+        self._func(self)

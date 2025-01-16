@@ -2,9 +2,9 @@ import numpy as np
 import math
 
 class SpeciesInfo:
-    def __init__(self, _sim, me, ancestor):
+    def __init__(self, _sim, me, ancestor) -> None:
         self.sim = _sim
-        self.speciesID = me.species
+        self.species_id = me.species
         self.ancestor_id = None
         self.level = 0
         if ancestor is not None:
@@ -31,7 +31,7 @@ class SpeciesInfo:
                 ancestor.become_prominent()
                 
     def insert_into_prominent_species_list(self):
-        i = self.speciesID
+        i = self.species_id
         p = self.sim.prominent_species
         while len(p) <= self.level: # this level doesn't exist yet. Add new levels of the genealogy tree to acommodate you
             p.append([])

@@ -8,14 +8,7 @@ import pygame
 import bisect
 
 
-# BLACK = (0,0,0)
-# GRAY25 = (70,70,70)
-# GRAY50 = (128,128,128)
-# WHITE = (255,255,255)
-# RED = (255,0,0)
-# GREEN = (0,255,0)
-
-def draw_all_graphs(sim, ui):
+def draw_all_graphs(sim, ui) -> None:
     draw_line_graph(sim.percentiles, ui.graph, [70, 0, 30, 30], sim.units_per_meter, ui.small_font)
     draw_sac(sim.species_pops, ui.sac, [70, 0], ui)
     draw_gene_graph(sim.species_info, sim.prominent_species, ui.gene_graph, sim, ui, ui.tiny_font)
