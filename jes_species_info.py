@@ -1,5 +1,4 @@
 import numpy as np
-from hashlib import sha256
 import math
 
 class SpeciesInfo:
@@ -14,7 +13,7 @@ class SpeciesInfo:
             
         self.apex_pop = 0
         self.reign = []
-        self.reps = np.zeros((4), dtype=int) # Representative ancestor, first, apex, and last creatures of this species.
+        self.reps = np.zeros(4, dtype=int) # Representative ancestor, first, apex, and last creatures of this species.
         self.prominent = False
         
         if ancestor is not None:
@@ -49,11 +48,11 @@ class SpeciesInfo:
         pL.insert(insert_index,i)
 
     def getWhen(self, index):
-        return math.floor(self.reps[index]//self.sim.c_count)
+        return math.floor(self.reps[index] // self.sim.creature_count)
         
     def getPerformance(self, sim, index):
-        gen = math.floor(self.reps[index]//self.sim.c_count)
-        c = self.reps[index]%self.sim.c_count
+        gen = math.floor(self.reps[index] // self.sim.creature_count)
+        c = self.reps[index]%self.sim.creature_count
         creature = sim.creatures[gen][c]
         return creature.fitness
         

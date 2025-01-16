@@ -10,7 +10,7 @@ class Slider:
         self.snap_to_int = psnap_to_int
         self.update_live = pupdate_live
         self.update_function = pupdate_function
-        ui.sliderList.append(self)
+        ui.slider_list.append(self)
         
     def drawSlider(self, screen):
         x, y, w, h, dw = self.dim

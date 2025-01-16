@@ -119,7 +119,7 @@ BG_COLOR = (0,0,0)
     
     def doSpeciesInfo(self,nsp,best_of_each_species):
         p1 = 0 # 'p' stands for 'pointer'
-        while p1 < self.c_count:
+        while p1 < self.creature_count:
             s = data[p1]
             p2 = bisect.bisect(data, s+0.5)
             pop = p2-p1
@@ -129,7 +129,7 @@ BG_COLOR = (0,0,0)
             if pop > sp.apex_pop: # This species reached its highest population
                 sp.apex_pop = pop
                 sp.reps[2] = best_of_each_species[s] # apex representative
-            if pop > self.c_count*0.10 and not sp.prominent:  #prominent threshold
+            if pop > self.creature_count*0.10 and not sp.prominent:  #prominent threshold
                 sp.becomeProminent()
                 
             sp.reps[3] = best_of_each_species[s] # most-recent representative
@@ -153,7 +153,7 @@ BG_COLOR = (0,0,0)
     p1 = p2 = 0
     record = 0
     recordHolder = -1
-    while p1 < sim.c_count:
+    while p1 < sim.creature_count:
         s = data[p1]
         p2 = bisect.bisect(data, s+0.5)
         pop = p2-p1
@@ -181,17 +181,17 @@ p1 = p2 = q1 = q2 = i_start
         
         
 p1 = p2 = 0
-    while p1 < sim.c_count:
+    while p1 < sim.creature_count:
         s = sim.species_pops[a2,p1]
         p2 = bisect.bisect(sim.species_pops[a2], s+0.5)
         pop = p2-p1
-        if pop >= sim.c_count*sim.S_VISIBLE:
+        if pop >= sim.creature_count*sim.S_VISIBLE:
             speciesI = (p1+p2)/2
-            speciesY = 560+300*(1-speciesI/sim.c_count)
+            speciesY = 560+300*(1 - speciesI / sim.creature_count)
             name = species_to_name(s)
             color = speciesToColor(s)
             OUTLINE = ui.WHITE if s == top_species else None
-            alignText(screen, f"{name}: {int(pop)}", lineX+10, speciesY, color, ui.smallFont, 0.0, [ui.BLACK,OUTLINE])
+            alignText(screen, f"{name}: {int(pop)}", lineX + 10, speciesY, color, ui.small_font, 0.0, [ui.BLACK, OUTLINE])
         p1 = p2
         
         
@@ -222,7 +222,7 @@ p1 = p2 = 0
         
         p1 = p2 = 0
     
-    while p1 < sim.c_count:
+    while p1 < sim.creature_count:
         s = sim.species_pops[a2,p1]
         p2 = bisect.bisect(sim.species_pops[a2], s+0.5)
         info = sim.species_info[s]
@@ -232,8 +232,8 @@ p1 = p2 = 0
             if s == top_species:
                 circle_count += 1
             for c in range(circle_count):
-                cx = info.coor[0]+ui.GENEALOGY_COOR[0]
-                cy = info.coor[1]+ui.GENEALOGY_COOR[1]
+                cx = info.coor[0]+ui.genealogy_coor[0]
+                cy = info.coor[1]+ui.genealogy_coor[1]
                 pygame.draw.circle(screen, ui.WHITE, (cx,cy), R+3+6*c, 3)
         p1 = p2
         
