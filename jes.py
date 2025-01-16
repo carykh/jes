@@ -12,10 +12,6 @@ c_input = input("How many creatures do you want?\n100: Lightweight\n250: Standar
 if c_input == "":
     c_input = "250"
 
-# Simulation
-# population size is 250 here, because that runs faster. You can increase it to 500 to replicate what was in my video, but do that at your own risk!
-
-
 
 sim: Sim = Sim(creature_count=int(c_input), config=sim_config)
 

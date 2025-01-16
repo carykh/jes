@@ -370,7 +370,7 @@ class UI:
                 transform = [dim[0]/2 - average_x*s,dim[1]*0.8,s]
                 self.creature_highlight[i].draw_creature(self.movie_screens[i], node_arr[0], current_frame, transform, True, (i == 0))
 
-            except Exception as _:
+            except TypeError as _:
                 pass
                 
     def get_highlighted_species(self):
