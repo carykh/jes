@@ -1,4 +1,5 @@
 import pygame
+import os
 from utils import arrayLerp, getUnit, hue_to_rgb, speciesToColor, species_to_name, dist_to_text, bound, getDist, arrayIntMultiply
 from jes_dataviz import displayAllGraphs, drawAllGraphs
 from jes_shapes import drawRect, drawRingLight, drawX, centerText, alignText, rightText, drawClock, drawSpeciesCircle
@@ -15,9 +16,10 @@ class UI:
         self.sliderList = []
         self.buttonList = []
         pygame.font.init()
-        self.bigFont = pygame.font.Font('C:/Users/caryk/AppData/Local/Microsoft/Windows/Fonts/Jygquip 1.ttf', 60)
-        self.smallFont = pygame.font.Font('C:/Users/caryk/AppData/Local/Microsoft/Windows/Fonts/Jygquip 1.ttf', 30)
-        self.tinyFont = pygame.font.Font('C:/Users/caryk/AppData/Local/Microsoft/Windows/Fonts/Jygquip 1.ttf', 21)
+        font_path = os.path.expanduser('~/AppData/Local/Microsoft/Windows/Fonts/Jygquip 1.ttf')
+        self.bigFont = pygame.font.Font(font_path, 60)
+        self.smallFont = pygame.font.Font(font_path, 30)
+        self.tinyFont = pygame.font.Font(font_path, 21)
         self.BACKGROUND_PIC = pygame.image.load("visuals/background.png")
         self.W_W = _W_W
         self.W_H = _W_H
