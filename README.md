@@ -1,21 +1,32 @@
-Jelly Evolution Simulator
+# Jelly Evolution Simulator
 
-# Key-controls
+## How To Use
+1 - You will need Python to run the simulation. Download and install the latest release from [here](https://www.python.org/downloads/)
 
-ESC: Close the program
+2 - Download the source from GitHub, you may use `git clone https://github.com/carykh/jes.git`
 
-X: Toggle whether or not X's show up over killed jellies
+3 - Open a Terminal window in source folder (CMD, PowerShell, Bash, etc.)
 
-S: Store the species you're highlighting in memory. (Press S a 2nd time to unstore.) Why do this? Well, say you notice there's a creature who got #1 in a certain generation, but you can't find any trace of it elsewhere. Now, you can highlight the creature, press S, and their species bubble will show up in the upper-left. Then, roll your mouse 
+4 - Install the required packages using `pip install -r requirements.txt`
+
+5 - Run the simulation with `python jes.py`
+
+## Key-controls
+
+**ESC:** Close the program
+
+**X:** Toggle whether or not X's show up over killed jellies
+
+**S:** Store the species you're highlighting in memory. (Press S a 2nd time to unstore.) Why do this? Well, say you notice there's a creature who got #1 in a certain generation, but you can't find any trace of it elsewhere. Now, you can highlight the creature, press S, and their species bubble will show up in the upper-left. Then, roll your mouse 
 over the species bubble, and there's all the species info!
 
-C: Change the color of the species you're highlighting. Do this when 2 species are annoyingly close in color, and you want a better way to tell them apart.
+**C:** Change the color of the species you're highlighting. Do this when 2 species are annoyingly close in color, and you want a better way to tell them apart.
 
-Q: Open/close the creature mosaic (can also be done by clicking "Show creatures" button)
+**Q:** Open/close the creature mosaic (can also be done by clicking "Show creatures" button)
 
-LEFT/RIGHT: Scroll through forward/backward through the timeline (can also be done by scrolling the scroll bar)
+**LEFT/RIGHT:** Scroll through forward/backward through the timeline (can also be done by scrolling the scroll bar)
 
-# Updates (2025-01-11)
+## Updates (2025-01-11)
 
 -Mutation-finding-bug fixed (I think)
 
