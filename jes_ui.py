@@ -8,6 +8,7 @@ import time
 import numpy as np
 import math
 import random
+import ctypes
 
 class UI:
     def __init__(self, _W_W, _W_H, _MOVIE_SINGLE_DIM, _GRAPH_COOR, _SAC_COOR, _GENEALOGY_COOR,
@@ -54,7 +55,11 @@ class UI:
         self.movieScreens = []
         self.sim = None
         
-        self.screen = pygame.display.set_mode((self.W_W,self.W_H))
+        #added this line to fix wrong window size
+        #fixes the size but breaks everything
+        ctypes.windll.user32.SetProcessDPIAware()
+        
+        self.screen = pygame.display.set_mode((self.W_W,self.W_H), pygame.FULLSCREEN)
         self.mosaicScreen = pygame.Surface((self.MS_WC,self.MS_H), pygame.SRCALPHA, 32)
         self.infoBarScreen = pygame.Surface((self.INFO_W,self.MS_H), pygame.SRCALPHA, 32)
         self.previewLocations = [[570,105,250,250],[570,365,250,250],[570,625,250,250]]
