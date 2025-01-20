@@ -1,0 +1,15 @@
+{
+  "title": "Jelly Evolution Simulator",
+  "fps": 30,
+  "window_width": 1920,
+  "window_height": 1080,
+  "movie_single_dim": [650, 650],
+  "graph_coor": [850, 50, 900, 500],
+  "sac_coor": [850, 560, 900, 300],
+  "genealogy_coor": [20, 105, 530, 802, 42],
+  "column_margin": 330,
+  "mosaic_dim": [10, 24, 24, 30],
+  "menu_text_up": 180,
+  "cm_margin_1": 20,
+  "cm_margin_2": 1
+}

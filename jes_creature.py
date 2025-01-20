@@ -1,74 +1,74 @@
 import pygame
-from utils import arrayLerp, dist_to_text, speciesToColor, listLerp, lerp
-from jes_shapes import drawRect, drawTextRect, centerText, drawClock
+from pygame import Surface
+
+from enums import Color
+from utils import array_lerp, dist_to_text, species_to_color, list_lerp, lerp
+from jes_shapes import draw_rect, draw_text_rect, center_text, draw_clock
 import numpy as np
 import math
-from jes_species_info import SpeciesInfo
 import random
 
 class Creature:
-    def __init__(self,d,pIDNumber,parent_species,_sim,_ui):
+    def __init__(self, d, p_id_number, parent_species, _sim, _ui) -> None:
         self.dna = d
         self.calmState = None
         self.icons = [None]*2
-        self.iconCoor = None
-        self.IDNumber = pIDNumber
+        self.icon_coor = None
+        self.id_number = p_id_number
         self.fitness = None
         self.rank = None
         self.living = True
-        self.species = self.getSpecies(parent_species)
+        self.species = self.get_species(parent_species)
         self.sim = _sim
         self.ui = _ui
-        self.codonWithChange = None
+        self.codon_with_change = None
     
-    def getSpecies(self, parent_species):
+    def get_species(self, parent_species):
         if parent_species == -1:
-            return self.IDNumber
+            return self.id_number
         else:
             return parent_species
     
-    def drawCell(self,surface,nodeState,frame,transform,x,y):
-        tx,ty,s = transform
-        color = self.traitsToColor(self.dna,x,y,frame)
-        points = [None]*4
+    def draw_cell(self, surface, node_state, frame, transform, x, y) -> None:
+        tx, ty, s = transform
+        color = self.traits_to_color(self.dna, x, y, frame)
+        points = [None] * 4
         for p in range(4):
             px = x
             if p == 1 or p == 2:
                 px += 1
             py = y+p//2
-            points[p] = [tx+nodeState[px,py,0]*s,ty+nodeState[px,py,1]*s]
-        pygame.draw.polygon(surface,color,points)
+            points[p] = [tx + node_state[px,py,0] * s, ty + node_state[px,py,1] * s]
+
+        pygame.draw.polygon(surface, color, points)
         
-    def drawEnvironment(self,surface,nodeState,frame,transform):
-        BLACK = (0,0,0)
-        WHITE = (255,255,255)
-        SIGN_COLOR = (150,100,50)
+    def draw_environment(self, surface, transform) -> None:
         #sky
-        drawRect(surface,transform,None,BLACK)
+        draw_rect(surface, transform, None, Color.BLACK)
         
         #signs
-        font = self.ui.bigFont if transform[2] >= 50 else self.ui.smallFont
+        font = self.ui.big_font if transform[2] >= 50 else self.ui.small_font
         for meters in range(0,3000,100):
-            u = meters*self.sim.UNITS_PER_METER
-            drawRect(surface,transform,[u-0.2,-6,u+0.2,0],SIGN_COLOR)
-            drawTextRect(surface,transform,[u-1.5,-6.8,u+1.5,-5.4],SIGN_COLOR,WHITE,f"{meters}cm",font)
+            u = meters*self.sim.units_per_meter
+            draw_rect(surface, transform, [u - 0.2, -6, u + 0.2, 0], Color.SIGN)
+            draw_text_rect(surface, transform, [u - 1.5, -6.8, u + 1.5, -5.4], Color.SIGN, Color.WHITE, f"{meters}cm", font)
         
         #ground
-        drawRect(surface,transform,[None,0,None,None],WHITE)
+        draw_rect(surface, transform, [None, 0, None, None], Color.WHITE)
 
-    def drawCreature(self, surface, nodeState, frame, transform, drawLabels, shouldDrawClock):
-        if drawLabels:
-            self.drawEnvironment(surface,nodeState,frame,transform)
+    def draw_creature(self, surface, node_state, frame, transform, draw_labels:bool, should_draw_clock: bool):
+        if draw_labels:
+            self.draw_environment(surface, transform)
             
-        cellSurface = pygame.Surface(surface.get_size(), pygame.SRCALPHA, 32)
+        cell_surface = pygame.Surface(surface.get_size(), pygame.SRCALPHA, 32)
         for x in range(self.sim.CW):
             for y in range(self.sim.CH):
-                self.drawCell(cellSurface,nodeState,frame,transform,x,y)
-        surface.blit(cellSurface,(0,0))
+                self.draw_cell(cell_surface, node_state, frame, transform, x, y)
+        surface.blit(cell_surface,(0,0))
    
-        if drawLabels:
+        if draw_labels:
             tx,ty,s = transform
-            avg_x = np.mean(nodeState[:,:,0],axis=(0,1))
+            avg_x = np.mean(node_state[:, :, 0], axis=(0, 1))
             lx = tx+avg_x*s
             ly = 20
             lw = 100
@@ -76,34 +76,36 @@ class Creature:
             ar = 15
             pygame.draw.rect(surface, (255,0,0),(lx-lw/2,ly,lw,lh))
             pygame.draw.polygon(surface,(255,0,0),((lx,ly+lh+ar),(lx-ar,ly+lh),(lx+ar,ly+lh)))
-            centerText(surface, f"{dist_to_text(avg_x,True,self.sim.UNITS_PER_METER)}", lx, ly+18, self.ui.WHITE, self.ui.smallFont)
+            center_text(surface, f"{dist_to_text(avg_x, True, self.sim.units_per_meter)}", lx, ly + 18, Color.WHITE, self.ui.small_font)
             
             ratio = 1-frame/self.sim.trial_time
-        if shouldDrawClock:
-            drawClock(surface,[40,40,32],ratio,str(math.ceil(ratio*self.sim.trial_time/self.ui.FPS)),self.ui.smallFont)
+
+        if should_draw_clock:
+            draw_clock(surface, [40, 40, 32], ratio, str(math.ceil(ratio * self.sim.trial_time / self.ui.fps)), self.ui.small_font)
 
         
-    def drawIcon(self, ICON_DIM, BG_COLOR, BEAT_FADE_TIME):
-        icon = pygame.Surface(ICON_DIM, pygame.SRCALPHA, 32)
-        icon.fill(BG_COLOR)
-        transform = [ICON_DIM[0]/2,ICON_DIM[0]/(self.sim.CW+2),ICON_DIM[0]/(self.sim.CH+2.85)]
-        self.drawCreature(icon,self.calmState,BEAT_FADE_TIME,transform,False,False)
-        R = ICON_DIM[0]*0.09
-        R2 = ICON_DIM[0]*0.12
-        pygame.draw.circle(icon,speciesToColor(self.species, self.ui),(ICON_DIM[0]-R2,R2),R)
+    def draw_icon(self, icon_dim, bg_color, beat_fade_time: int) -> Surface:
+        icon: Surface = pygame.Surface(icon_dim, pygame.SRCALPHA, 32)
+        icon.fill(bg_color)
+        transform = [icon_dim[0] / 2, icon_dim[0] / (self.sim.CW + 2), icon_dim[0] / (self.sim.CH + 2.85)]
+        self.draw_creature(icon, self.calmState, beat_fade_time, transform, False, False)
+        r = icon_dim[0] * 0.09
+        r2 = icon_dim[0] * 0.12
+        pygame.draw.circle(icon, species_to_color(self.species, self.ui), (icon_dim[0] - r2, r2), r)
+
         return icon
         
-    def saveCalmState(self, arr):
+    def save_calm_state(self, arr):
         self.calmState = arr
         
-    def getMutatedDNA(self, sim):
+    def get_mutated_dna(self, sim):
         mutation = np.clip(np.random.normal(0.0, 1.0, self.dna.shape[0]),-99,99)
         result = self.dna + sim.mutation_rate*mutation
-        newSpecies = self.species
+        new_species = self.species
         
         big_mut_loc = 0
         if random.uniform(0,1) < self.sim.big_mutation_rate: # do a big mutation
-            newSpecies = sim.species_count
+            new_species = sim.species_count
             sim.species_count += 1
             cell_x = random.randint(0,self.sim.CW-1)
             cell_y = random.randint(0,self.sim.CH-1)
@@ -120,33 +122,36 @@ class Creature:
                 if i == 2 and result[big_mut_loc+i] < 0.5:
                     result[big_mut_loc+i] = 0.5
         
-        return result, newSpecies, big_mut_loc
+        return result, new_species, big_mut_loc
         
-    def traitsToColor(self, dna, x, y, frame):
-        beat = self.sim.frameToBeat(frame)
-        beat_prev = (beat+self.sim.beats_per_cycle-1)%self.sim.beats_per_cycle
-        prog = self.sim.frameToBeatFade(frame)
+    def traits_to_color(self, dna, x, y, frame):
+        beat = self.sim.frame_to_beat(frame)
+        beat_prev = (beat+ self.sim.beats_per_cycle - 1) % self.sim.beats_per_cycle
+        prog = self.sim.frame_to_beat_fade(frame)
         
-        locationIndex = x*self.sim.CH+y
-        DNAIndex = (locationIndex*self.sim.beats_per_cycle+beat)*self.sim.traits_per_box
-        DNAIndex_prev = (locationIndex*self.sim.beats_per_cycle+beat_prev)*self.sim.traits_per_box
-        traits = dna[DNAIndex:DNAIndex+self.sim.traits_per_box]
-        traits_prev = dna[DNAIndex_prev:DNAIndex_prev+self.sim.traits_per_box]
-        traits = arrayLerp(traits_prev,traits,prog)
+        location_index = x * self.sim.CH + y
+        dna_index = (location_index*self.sim.beats_per_cycle+beat)*self.sim.traits_per_box
+        dna_index_prev = (location_index*self.sim.beats_per_cycle+beat_prev)*self.sim.traits_per_box
+
+        traits = dna[dna_index:dna_index+self.sim.traits_per_box]
+        traits_prev = dna[dna_index_prev:dna_index_prev+self.sim.traits_per_box]
+        traits = array_lerp(traits_prev, traits, prog)
 
         red = min(max(int(128+traits[0]*128),0),255)
         green = min(max(int(128+traits[1]*128),0),255)
         alpha = min(max(int(155+traits[2]*100),64),255) #alpha can't go below 25%
         color_result = (red,green,255,alpha)
         
-        if self.codonWithChange is not None:
-            nextGreen = 0
-            if self.codonWithChange >= DNAIndex and self.codonWithChange < DNAIndex+self.sim.traits_per_box:
-                nextGreen = 1
-            prevGreen = 0
-            if self.codonWithChange >= DNAIndex_prev and self.codonWithChange < DNAIndex_prev+self.sim.traits_per_box:
-                prevGreen = 1
-            green_ness = lerp(prevGreen,nextGreen,prog)
-            color_result = listLerp(color_result,(0,255,0,255),green_ness)
+        if self.codon_with_change is not None:
+            next_green = 0
+            if dna_index <= self.codon_with_change < dna_index+self.sim.traits_per_box:
+                next_green = 1
+
+            prev_green = 0
+            if dna_index_prev <= self.codon_with_change < dna_index_prev+self.sim.traits_per_box:
+                prev_green = 1
+
+            green_ness = lerp(prev_green,next_green,prog)
+            color_result = list_lerp(color_result, (0, 255, 0, 255), green_ness)
         
         return color_result

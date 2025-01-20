@@ -1,0 +1,20 @@
+{
+  "stabilization_time": 200,
+  "trial_time": 300,
+  "beat_time": 20,
+  "beat_fade_time": 5,
+  "c_dim": [4, 4],
+  "beats_per_cycle": 3,
+  "node_coor_count": 4,
+  "y_clips": [-10000000, 0],
+  "ground_friction_coef": 25,
+  "gravity_acceleration_coef": 0.002,
+  "calming_friction_coef": 0.7,
+  "typical_friction_coef": 0.8,
+  "muscle_coef": 0.08,
+  "traits_per_box": 3,
+  "traits_extra": 1,
+  "mutation_rate": 0.07,
+  "big_mutation_rate": 0.025,
+  "units_per_meter": 0.05
+}
