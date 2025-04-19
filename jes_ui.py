@@ -6,7 +6,7 @@ from jes_slider import Slider
 from jes_button import Button
 import time
 import numpy as np
-import math
+import os
 import random
 
 class UI:
@@ -15,9 +15,13 @@ class UI:
         self.sliderList = []
         self.buttonList = []
         pygame.font.init()
-        self.bigFont = pygame.font.Font('C:/Users/caryk/AppData/Local/Microsoft/Windows/Fonts/Jygquip 1.ttf', 60)
-        self.smallFont = pygame.font.Font('C:/Users/caryk/AppData/Local/Microsoft/Windows/Fonts/Jygquip 1.ttf', 30)
-        self.tinyFont = pygame.font.Font('C:/Users/caryk/AppData/Local/Microsoft/Windows/Fonts/Jygquip 1.ttf', 21)
+        appdata = os.getenv('APPDATA')
+        font = f'{appdata}/Local/Microsoft/Windows/Fonts/Jygquip 1.ttf'  # If a user has the custom font installed, it will now work!
+        if not os.path.isfile(font):
+            font = './visuals/FRAMDCN.TTF' # fits a bit better than the old typeface
+        self.bigFont = pygame.font.Font(font, 60)
+        self.smallFont = pygame.font.Font(font, 30)
+        self.tinyFont = pygame.font.Font(font, 21)
         self.BACKGROUND_PIC = pygame.image.load("visuals/background.png")
         self.W_W = _W_W
         self.W_H = _W_H
