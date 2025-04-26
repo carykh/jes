@@ -1,19 +1,20 @@
 import numpy as np
 from hashlib import sha256
 import math
+from utils import species_to_name
 
 class SpeciesInfo:
-    def __init__(self, _sim, me, ancestor):
+    def __init__(self, _sim, me, ancestor, generation):
         self.sim = _sim
         self.speciesID = me.species
         self.ancestorID = None
+        self.generation = generation
         self.level = 0
         if ancestor is not None:
             self.ancestorID = ancestor.species
             self.level = self.sim.species_info[ancestor.species].level+1
             
         self.apex_pop = 0
-        self.reign = []
         self.reps = np.zeros((4), dtype=int) # Representative ancestor, first, apex, and last creatures of this species.
         self.prominent = False
         
@@ -21,6 +22,9 @@ class SpeciesInfo:
             self.reps[0] = ancestor.IDNumber
         self.reps[1] = me.IDNumber
         self.coor = None
+
+    def __str__(self):
+        return f"{species_to_name(self.speciesID, self.sim.ui)}"
         
     def becomeProminent(self):  # if you are prominent, all your ancestors become prominent.
         self.prominent = True

@@ -6,6 +6,12 @@ import pygame
 import random
 import bisect
 
+# Cache for sorted species keys
+_species_keys_cache = {}
+# Cache for species colors
+_species_color_cache = {}
+
+
 def drawAllGraphs(sim, ui):
     drawLineGraph(sim.percentiles, ui.graph, [70,0,30,30], sim.UNITS_PER_METER, ui.smallFont)
     drawSAC(sim.species_pops, ui.sac, [70,0], ui)
@@ -56,10 +62,106 @@ def drawLineGraph(data,graph,margins,u,font):
                 thickness = 3
             pygame.draw.line(graph, color, (x1, y1), (x2, y2), width=thickness)
             
-def drawSAC(data,sac,margins,ui):
-    sac.fill((0,0,0))
+
+def drawSAC(data, sac, margins, ui):
+    """
+    Optimized Species Area Chart drawing function.
+    """
+    sac.fill((0, 0, 0))
+    
+    # Pre-calculate constants
+    W = sac.get_width() - margins[0] - margins[1]
+    H = sac.get_height()
+    LEN = len(data)
+    LEFT = margins[0]
+    
+    # Cache the species keys for each generation to avoid repeated sorting
     for g in range(len(data)):
-        scanDownTrapezoids(data, g, sac, margins, ui)
+        _species_keys_cache[g] = sorted(list(data[g].keys()))
+    
+    # Draw all generations
+    for g in range(len(data)):
+        x1 = LEFT + (g / LEN) * W
+        x2 = LEFT + ((g + 1) / LEN) * W
+        
+        if g == 0:
+            # Optimization for first generation
+            keys = _species_keys_cache[g]
+            c_count = data[g][keys[-1]][2]  # ending index of the last entry
+            FAC = H / c_count
+            
+            for sp in keys:
+                pop = data[g][sp]
+                points = [[x1, H/2], [x1, H/2], [x2, H-pop[1]*FAC], [x2, H-pop[2]*FAC]]
+                color = get_cached_species_color(sp, ui)
+                pygame.draw.polygon(sac, color, points)
+        else:
+            keys = _species_keys_cache[g]
+            c_count = data[g][keys[-1]][2]  # ending index of the last entry
+            FAC = H / c_count
+            trapezoidHelper(sac, data, g, g-1, 0, c_count, x1, x2, FAC, 0, ui)
+   
+def get_cached_species_color(species_id, ui):
+    """
+    Retrieve cached species color or compute and cache it if not available.
+    """
+    if species_id not in _species_color_cache:
+        _species_color_cache[species_id] = speciesToColor(species_id, ui)
+    return _species_color_cache[species_id]
+
+def getRangeEvenIfNone(dicty, key, generation=None):
+    """
+    Optimized function to get the range for a species, even if the species
+    doesn't exist in the given dictionary.
+    """
+    # Use cached sorted keys if available
+    if generation is not None and generation in _species_keys_cache:
+        keys = _species_keys_cache[generation]
+    else:
+        # Fall back to sorting if cache not available
+        keys = sorted(list(dicty.keys()))
+        
+    if key in keys:
+        return dicty[key]
+    else:
+        n = bisect.bisect_right(keys, key)
+        if n >= len(keys):
+            val = dicty[keys[n-1]][2]
+        else:
+            val = dicty[keys[n]][1]
+        return [0, val, val]
+
+def trapezoidHelper(sac, data, g1, g2, i_start, i_end, x1, x2, FAC, level, ui):
+    """
+    Optimized trapezoid drawing helper that uses caching for performance.
+    """
+    # Get the keys from the cache
+    keys1 = _species_keys_cache.get(g1, sorted(list(data[g1].keys())))
+    
+    H = sac.get_height()
+    pop2 = [0, 0, 0]
+    
+    # Pre-compute all colors needed to avoid calling speciesToColor in the loop
+    colors = {}
+    for sp in keys1:
+        colors[sp] = get_cached_species_color(sp, ui)
+    
+    # Loop through species using the cached sorted keys
+    for sp in keys1:
+        pop1 = data[g1][sp]
+        if level == 0 and pop1[1] != pop2[2]:  # there was a gap
+            trapezoidHelper(sac, data, g2, g1, pop2[2], pop1[1], x2, x1, FAC, 1, ui)
+        
+        # Use optimized function with generation hint
+        pop2 = getRangeEvenIfNone(data[g2], sp, g2)
+        
+        # Draw the polygon
+        points = [[x1, H-pop2[1]*FAC], [x1, H-pop2[2]*FAC], 
+                  [x2, H-pop1[2]*FAC], [x2, H-pop1[1]*FAC]]
+        pygame.draw.polygon(sac, colors[sp], points)
+        
+        # Update for next iteration
+        pop2 = pop1
         
 def scanDownTrapezoids(data, g, sac, margins, ui):
     W = sac.get_width()-margins[0]-margins[1]
@@ -81,28 +183,6 @@ def scanDownTrapezoids(data, g, sac, margins, ui):
     else:
         trapezoidHelper(sac, data, g, g-1, 0, c_count, x1, x2, FAC, 0, ui)
    
-def getRangeEvenIfNone(dicty, key):
-    keys = sorted(list(dicty.keys()))
-    if key in keys:
-        return dicty[key]
-    else:
-        n = bisect.bisect(keys, key+0.5)
-        if n >= len(keys):
-            val = dicty[keys[n-1]][2]
-        else:
-            val = dicty[keys[n]][1]
-        return [0,val,val]
-
-def trapezoidHelper(sac, data, g1, g2, i_start, i_end, x1, x2, FAC, level, ui):
-    pop2 = [0,0,0]
-    H = sac.get_height()
-    for sp in data[g1].keys():
-        pop1 = data[g1][sp]
-        if level == 0 and pop1[1] != pop2[2]: #there was a gap
-            trapezoidHelper(sac, data, g2, g1, pop2[2], pop1[1], x2, x1, FAC, 1, ui)
-        pop2 = getRangeEvenIfNone(data[g2],sp)
-        points = [[x1,H-pop2[1]*FAC],[x1,H-pop2[2]*FAC],[x2,H-pop1[2]*FAC],[x2,H-pop1[1]*FAC]]
-        pygame.draw.polygon(sac,speciesToColor(sp, ui),points)
         
 def drawGeneGraph(species_info, ps, gg, sim, ui, font):  # ps = prominent_species
     R = ui.GENEALOGY_COOR[4]

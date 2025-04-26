@@ -4,10 +4,13 @@ from jes_shapes import drawRect, drawTextRect, centerText, drawClock
 import numpy as np
 import math
 from jes_species_info import SpeciesInfo
+# from jes_sim import Sim
 import random
+import logging
 
 class Creature:
-    def __init__(self,d,pIDNumber,parent_species,_sim,_ui):
+    def __init__(self,d,pIDNumber,parent_species,_sim,_ui, max_offspring=4, logger=None, mutate_rate=0.05):
+        self.logger = logger or logging.getLogger(__name__)
         self.dna = d
         self.calmState = None
         self.icons = [None]*2
@@ -20,6 +23,11 @@ class Creature:
         self.sim = _sim
         self.ui = _ui
         self.codonWithChange = None
+        self.max_offspring = max_offspring
+        self.generation_offspring = 0
+
+    def __str__(self):
+        return f"ID: {self.IDNumber:<5} S: {str(self.sim.species_info[self.species]):<10}  OG: {self.generation_offspring:<4}"
     
     def getSpecies(self, parent_species):
         if parent_species == -1:
@@ -95,16 +103,34 @@ class Creature:
         
     def saveCalmState(self, arr):
         self.calmState = arr
+
+    def check_if_new_species(self, other_dna):
+        sp_info = self.sim.species_info[self.species]
+        species_rep_dna = self.sim.getCreatureWithID(sp_info.reps[1]).dna
+
+        new_creature_similarity = self.calculate_raw_dna_similarity(species_rep_dna, other_dna)
+        if new_creature_similarity < self.sim.species_threshold:
+            self.logger.info(f"Creating new species, as offspring similarity is below threshold: {new_creature_similarity}")
+            return True
+        return False
+
         
     def getMutatedDNA(self, sim):
-        mutation = np.clip(np.random.normal(0.0, 1.0, self.dna.shape[0]),-99,99)
-        result = self.dna + sim.mutation_rate*mutation
+        mutation = np.clip(np.random.normal(-1.0, 1.0, self.dna.shape[0]),-99,99)
+        mutation_mask = np.random.random(self.dna.shape) < sim.mutation_rate
+        result = self.dna + sim.mutation_size * mutation * mutation_mask
         newSpecies = self.species
         
         big_mut_loc = 0
-        if random.uniform(0,1) < self.sim.big_mutation_rate: # do a big mutation
+
+        if self.check_if_new_species(result):
             newSpecies = sim.species_count
             sim.species_count += 1
+            # biggest_dna_change = mutation.argmax()
+            return result, newSpecies, big_mut_loc
+
+        if random.uniform(0,1) < self.sim.big_mutation_rate: # do a big mutation
+
             cell_x = random.randint(0,self.sim.CW-1)
             cell_y = random.randint(0,self.sim.CH-1)
             cell_beat = random.randint(0,self.sim.beats_per_cycle-1)
@@ -113,14 +139,37 @@ class Creature:
             for i in range(self.sim.traits_per_box):
                 delta = 0
                 while abs(delta) < 0.5:
-                    delta = np.random.normal(0.0, 1.0, 1)
+                    delta = np.random.normal(-1.0, 1.0, 1)
                 result[big_mut_loc+i] += delta
                 
                 #Cells that endure a big mutation are also required to be at least somewhat rigid, because if a cell goes from super-short to super-tall but has low rigidity the whole time, then it doesn't really matter.
                 if i == 2 and result[big_mut_loc+i] < 0.5:
                     result[big_mut_loc+i] = 0.5
-        
+            
+        if self.check_if_new_species(result):
+            newSpecies = sim.species_count
+            sim.species_count += 1
+
         return result, newSpecies, big_mut_loc
+    def calculate_dna_similarity(self, other_creature):
+        """
+        Calculate the genetic similarity between this creature and another creature.
+        Returns a value between 0 and 1, where 1 means identical DNA.
+        """
+        # Calculate Euclidean distance between DNA arrays, normalized
+        distance = np.sqrt(np.sum(np.square(self.dna - other_creature.dna)))
+        # Convert to similarity (closer to 1 means more similar)
+        max_possible_distance = np.sqrt(len(self.dna) * 36)  # Maximum possible distance assuming all values differ by 6 (-3 to 3)
+        similarity = 1 - (distance / max_possible_distance)
+        return similarity
+    
+    def calculate_raw_dna_similarity(self, dna_a, dna_b):
+        distance = np.sqrt(np.sum(np.square(dna_a - dna_b)))
+        # Convert to similarity (closer to 1 means more similar)
+        max_possible_distance = np.sqrt(len(dna_a) * 36)  # Maximum possible distance assuming all values differ by 6 (-3 to 3)
+        similarity = 1 - (distance / max_possible_distance)
+        return similarity
+
         
     def traitsToColor(self, dna, x, y, frame):
         beat = self.sim.frameToBeat(frame)
