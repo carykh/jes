@@ -78,7 +78,7 @@ class Sim:
             
     def getStartingNodeCoor(self, gen, startIndex, endIndex, fromCalmState):
         COUNT = endIndex-startIndex
-        n = np.zeros((COUNT,self.CH+1,self.CW+1,self.node_coor_count))
+        n = np.zeros((COUNT,self.CW+1,self.CH+1,self.node_coor_count))
         if not fromCalmState or self.creatures[gen][0].calmState is None:
             # create grid of nodes along perfect gridlines
             coorGrid = np.mgrid[0:self.CW+1,0:self.CH+1]
@@ -93,10 +93,10 @@ class Sim:
 
     def getMuscleArray(self, gen, startIndex, endIndex):
         COUNT = endIndex-startIndex
-        m = np.zeros((COUNT,self.CH,self.CW,self.beats_per_cycle,self.traits_per_box+1)) # add one trait for diagonal length.
+        m = np.zeros((COUNT,self.CW,self.CH,self.beats_per_cycle,self.traits_per_box+1)) # add one trait for diagonal length.
         DNA_LEN = self.CH*self.CW*self.beats_per_cycle*self.traits_per_box
         for c in range(startIndex,endIndex):
-            dna = self.creatures[gen][c].dna[0:DNA_LEN].reshape(self.CH,self.CW,self.beats_per_cycle,self.traits_per_box)
+            dna = self.creatures[gen][c].dna[0:DNA_LEN].reshape(self.CW,self.CH,self.beats_per_cycle,self.traits_per_box)
             m[c-startIndex,:,:,:,:self.traits_per_box] = 1.0+(dna)/3.0
         m[:,:,:,:,3] = np.sqrt(np.square(m[:,:,:,:,0])+np.square(m[:,:,:,:,1])) # Set diagonal tendons
         return m

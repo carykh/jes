@@ -103,8 +103,6 @@ def applyMuscles(n,m,muscle_coef):
     MAs = [None]*6
     segments = [[0,0,1,0],[0,1,1,1],
     [0,0,0,1],[1,0,1,1],[0,0,1,1],[0,1,1,0]]
-    segments2 = [[0,0,1,0],[0,1,1,1],
-    [0,0,0,1],[1,0,1,1],[0,0,1,1],[0,1,1,0]]
     
     
     MAs[0] = getMuscleAttraction(xNeighborDists[:,:,:-1],m[:,:,:,0],muscle_coef)
@@ -127,8 +125,8 @@ def applyMuscles(n,m,muscle_coef):
     
     for dire in range(6):
         s = segments[dire]
-        sli1 = n[:,s[0]:s[0]+CW,s[1]:s[1]+CW]
-        sli2 = n[:,s[2]:s[2]+CH,s[3]:s[3]+CH]
+        sli1 = n[:,s[0]:s[0]+CW,s[1]:s[1]+CH]
+        sli2 = n[:,s[2]:s[2]+CW,s[3]:s[3]+CH]
         
         delta_x = sli1[:,:,:,0]-sli2[:,:,:,0]
         delta_y = sli1[:,:,:,1]-sli2[:,:,:,1]
@@ -137,10 +135,10 @@ def applyMuscles(n,m,muscle_coef):
         delta_nx = delta_x/delta_magnitude
         delta_ny = delta_y/delta_magnitude
         
-        n[:,s[0]:s[0]+CW,s[1]:s[1]+CW,2] += delta_nx*MAs[dire]
-        n[:,s[0]:s[0]+CW,s[1]:s[1]+CW,3] += delta_ny*MAs[dire]
-        n[:,s[2]:s[2]+CH,s[3]:s[3]+CH,2] -= delta_nx*MAs[dire]
-        n[:,s[2]:s[2]+CH,s[3]:s[3]+CH,3] -= delta_ny*MAs[dire]
+        n[:,s[0]:s[0]+CW,s[1]:s[1]+CH,2] += delta_nx*MAs[dire]
+        n[:,s[0]:s[0]+CW,s[1]:s[1]+CH,3] += delta_ny*MAs[dire]
+        n[:,s[2]:s[2]+CW,s[3]:s[3]+CH,2] -= delta_nx*MAs[dire]
+        n[:,s[2]:s[2]+CW,s[3]:s[3]+CH,3] -= delta_ny*MAs[dire]
         
 def getMuscleAttraction(dists,m,muscle_coef):
     return (m-dists)*muscle_coef
