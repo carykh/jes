@@ -113,7 +113,7 @@ class Creature:
             for i in range(self.sim.traits_per_box):
                 delta = 0
                 while abs(delta) < 0.5:
-                    delta = np.random.normal(0.0, 1.0, 1)
+                    delta = np.random.normal(0.0, 1.0)
                 result[big_mut_loc+i] += delta
                 
                 #Cells that endure a big mutation are also required to be at least somewhat rigid, because if a cell goes from super-short to super-tall but has low rigidity the whole time, then it doesn't really matter.
