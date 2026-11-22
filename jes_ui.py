@@ -15,9 +15,9 @@ class UI:
         self.sliderList = []
         self.buttonList = []
         pygame.font.init()
-        self.bigFont = pygame.font.Font('interstate-Regular.ttf', 60)
-        self.smallFont = pygame.font.Font('interstate-Regular.ttf', 30)
-        self.tinyFont = pygame.font.Font('interstate-Regular.ttf', 21)
+        self.bigFont = pygame.font.Font('visuals/Interstate-Regular.ttf', 60)
+        self.smallFont = pygame.font.Font('visuals/Interstate-Regular.ttf', 30)
+        self.tinyFont = pygame.font.Font('visuals/Interstate-Regular.ttf', 21)
         self.BACKGROUND_PIC = pygame.image.load("visuals/background.png")
         self.W_W = _W_W
         self.W_H = _W_H
