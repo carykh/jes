@@ -6,8 +6,8 @@ c_input = input("How many creatures do you want?\n100: Lightweight\n250: Standar
 if c_input == "":
     c_input = "250"
 what_do_i_call_this_input = input("type \"f\" for fullscreen\ntype anything else for not fullscreen.\n")
-window_width = 0
-window_height = 0
+window_width = 1920
+window_height = 1078
 fullscreen = False
 if what_do_i_call_this_input.lower() == "f":
     fullscreen = True
