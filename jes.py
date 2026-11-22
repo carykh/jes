@@ -31,7 +31,7 @@ _mutation_rate=0.07, _big_mutation_rate=0.025,
 _UNITS_PER_METER=0.05)
 
 # Cosmetic UI variables
-ui = UI(_W_W=window_width, _W_H=window_height,_FULLSCREEN=fullscreen, _MOVIE_SINGLE_DIM=(650,650),
+ui = UI(_W_W=window_width, _W_H=window_height, _FULLSCREEN=fullscreen, _MOVIE_SINGLE_DIM=(650,650),
 _GRAPH_COOR=(850,50,900,500), _SAC_COOR=(850,560,900,300), _GENEALOGY_COOR=(20,105,530,802,42),
 _COLUMN_MARGIN=330, _MOSAIC_DIM=[10,24,24,30], #_MOSAIC_DIM=[10,10,17,22],
 _MENU_TEXT_UP=180, _CM_MARGIN1=20, _CM_MARGIN2=1)
