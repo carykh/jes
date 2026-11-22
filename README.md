@@ -42,3 +42,9 @@ There used to be a bug where, late in the simulation, big mutations would take f
 -Allowed the user to change the number of creatures in the simulation (first user input)
 
 -Fixed but where, when you click "Watch sample", it ONLY shows you a sampling of 8 creatures from the recent-est generation. Now, it always shows you a sampling of the generation your scroll bar is currently at.
+
+# Updates (2026-11-22)
+
+-Fixed the program not running if you aren't carykh
+
+-Added option for fullscreen
