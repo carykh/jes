@@ -55,7 +55,7 @@ class UI:
         self.movieScreens = []
         self.sim = None
         if self.FULLSCREEN == True:
-            self.screen = pygame.display.set_mode((self.W_W,self.W_H), pygame.FULLSCREEN)
+            self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
         else:
             self.screen = pygame.display.set_mode((self.W_W,self.W_H))
         self.mosaicScreen = pygame.Surface((self.MS_WC,self.MS_H), pygame.SRCALPHA, 32)
