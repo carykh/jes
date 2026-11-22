@@ -5,6 +5,14 @@ To run this program, run this command:
 ```
 cmd python jes.py
 ```
+On Ubuntu, first install pygame if you haven't already:
+```
+sudo apt install python3-pygame
+```
+then open jes-main inside of the terminal and run:
+```
+python3 jes.py
+```
 
 NOTE: This project, like all my projects, are not meant to be consumer products with perfect QA. Rather, it's just me, as one person, coding a casual experiment to the point that it works well enough on my computer to make a video from it! No more, no less. (I used to not put my code online, just like when you create a Minecraft world with your friends, you don't have to share the world with everyone. I just started posting code here because I wanted to make it easier for eager devs to make mods.) Long story short, I won't be doing bug-fixing or tech support on this project.
 
@@ -34,3 +42,9 @@ There used to be a bug where, late in the simulation, big mutations would take f
 -Allowed the user to change the number of creatures in the simulation (first user input)
 
 -Fixed but where, when you click "Watch sample", it ONLY shows you a sampling of 8 creatures from the recent-est generation. Now, it always shows you a sampling of the generation your scroll bar is currently at.
+
+# Updates (2026-11-22)
+
+-Fixed the program not running if you aren't carykh
+
+-Added option for fullscreen

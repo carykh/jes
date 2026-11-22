@@ -10,17 +10,18 @@ import math
 import random
 
 class UI:
-    def __init__(self, _W_W, _W_H, _MOVIE_SINGLE_DIM, _GRAPH_COOR, _SAC_COOR, _GENEALOGY_COOR,
+    def __init__(self, _W_W, _W_H, _FULLSCREEN, _MOVIE_SINGLE_DIM, _GRAPH_COOR, _SAC_COOR, _GENEALOGY_COOR,
     _COLUMN_MARGIN, _MOSAIC_DIM, _MENU_TEXT_UP, _CM_MARGIN1, _CM_MARGIN2):
         self.sliderList = []
         self.buttonList = []
         pygame.font.init()
-        self.bigFont = pygame.font.Font('C:/Users/caryk/AppData/Local/Microsoft/Windows/Fonts/Jygquip 1.ttf', 60)
-        self.smallFont = pygame.font.Font('C:/Users/caryk/AppData/Local/Microsoft/Windows/Fonts/Jygquip 1.ttf', 30)
-        self.tinyFont = pygame.font.Font('C:/Users/caryk/AppData/Local/Microsoft/Windows/Fonts/Jygquip 1.ttf', 21)
+        self.bigFont = pygame.font.Font('visuals/Interstate-Regular.ttf', 60)
+        self.smallFont = pygame.font.Font('visuals/Interstate-Regular.ttf', 30)
+        self.tinyFont = pygame.font.Font('visuals/Interstate-Regular.ttf', 21)
         self.BACKGROUND_PIC = pygame.image.load("visuals/background.png")
         self.W_W = _W_W
         self.W_H = _W_H
+        self.FULLSCREEN = _FULLSCREEN
         self.MOVIE_SINGLE_DIM = _MOVIE_SINGLE_DIM
         self.INFO_W = self.MOVIE_SINGLE_DIM[0]
         
@@ -53,8 +54,10 @@ class UI:
         self.visualSimMemory = []
         self.movieScreens = []
         self.sim = None
-        
-        self.screen = pygame.display.set_mode((self.W_W,self.W_H))
+        if self.FULLSCREEN == True:
+            self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+        else:
+            self.screen = pygame.display.set_mode((self.W_W,self.W_H))
         self.mosaicScreen = pygame.Surface((self.MS_WC,self.MS_H), pygame.SRCALPHA, 32)
         self.infoBarScreen = pygame.Surface((self.INFO_W,self.MS_H), pygame.SRCALPHA, 32)
         self.previewLocations = [[570,105,250,250],[570,365,250,250],[570,625,250,250]]
