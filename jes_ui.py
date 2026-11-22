@@ -54,7 +54,7 @@ class UI:
         self.visualSimMemory = []
         self.movieScreens = []
         self.sim = None
-        if: self.FULLSCREEN == True
+        if self.FULLSCREEN == True:
             self.screen = pygame.display.set_mode((self.W_W,self.W_H), pygame.FULLSCREEN)
         else:
             self.screen = pygame.display.set_mode((self.W_W,self.W_H))
