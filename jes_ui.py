@@ -21,7 +21,7 @@ class UI:
         self.BACKGROUND_PIC = pygame.image.load("visuals/background.png")
         self.W_W = _W_W
         self.W_H = _W_H
-        self.
+        self.FULLSCREEN = _FULLSCREEN
         self.MOVIE_SINGLE_DIM = _MOVIE_SINGLE_DIM
         self.INFO_W = self.MOVIE_SINGLE_DIM[0]
         
@@ -54,7 +54,7 @@ class UI:
         self.visualSimMemory = []
         self.movieScreens = []
         self.sim = None
-        if: self._FULLSCREEN == True
+        if: self.FULLSCREEN == True
             self.screen = pygame.display.set_mode((self.W_W,self.W_H), pygame.FULLSCREEN)
         else:
             self.screen = pygame.display.set_mode((self.W_W,self.W_H))
